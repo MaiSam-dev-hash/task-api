@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/task-api-0.3.0.jar app.jar
 
 # Exposer le port de l'application
-EXPOSE 8080
+EXPOSE 8085
 
 # Lancer l'application
 ENTRYPOINT ["java","-jar","app.jar"]
