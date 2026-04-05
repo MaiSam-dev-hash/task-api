@@ -1,0 +1,43 @@
+stages:
+  - test
+  - build
+  - docker
+
+# Règle pour déclencher le pipeline uniquement sur la branche develop
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# Job 1 : Test
+test:
+  stage: test
+  image: openjdk:17-jdk-slim
+  script:
+    - ./mvnw test
+
+# Job 2 : Build du JAR
+build:
+  stage: build
+  image: openjdk:17-jdk-slim
+  script:
+    - ./mvnw clean package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 hour
+
+# Job 3 : Build et Push de l'image Docker
+docker:
+  stage: docker
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  before_script:
+    # Connexion à Docker Hub avec les variables demandées
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    # On utilise la variable DOCKER_IMAGE demandée
+    - docker build -t $DOCKER_IMAGE:latest .
+    - docker push $DOCKER_IMAGE:latest
