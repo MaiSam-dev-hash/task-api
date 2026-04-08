@@ -11,7 +11,7 @@ workflow:
 # Job 1 : Exécution des tests unitaires
 test:
   stage: test
-  image: openjdk:17-jdk-slim
+  image: eclipse-temurin:17-jdk-alpine
   script:
     - chmod +x mvnw
     - ./mvnw test
@@ -19,7 +19,7 @@ test:
 # Job 2 : Construction du fichier JAR
 build:
   stage: build
-  image: openjdk:17-jdk-slim
+  image: eclipse-temurin:17-jdk-alpine
   script:
     - chmod +x mvnw
     - ./mvnw clean package -DskipTests
