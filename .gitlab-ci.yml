@@ -3,30 +3,32 @@ stages:
   - build
   - docker
 
-# Règle pour déclencher le pipeline uniquement sur la branche develop
+# Déclenchement automatique uniquement sur la branche develop
 workflow:
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
 
-# Job 1 : Test
+# Job 1 : Exécution des tests unitaires
 test:
   stage: test
   image: openjdk:17-jdk-slim
   script:
+    - chmod +x mvnw
     - ./mvnw test
 
-# Job 2 : Build du JAR
+# Job 2 : Construction du fichier JAR
 build:
   stage: build
   image: openjdk:17-jdk-slim
   script:
+    - chmod +x mvnw
     - ./mvnw clean package -DskipTests
   artifacts:
     paths:
       - target/*.jar
     expire_in: 1 hour
 
-# Job 3 : Build et Push de l'image Docker
+# Job 3 : Construction et Push de l'image sur Docker Hub
 docker:
   stage: docker
   image: docker:latest
@@ -35,9 +37,10 @@ docker:
   variables:
     DOCKER_DRIVER: overlay2
   before_script:
-    # Connexion à Docker Hub avec les variables demandées
+    # Authentification sécurisée via les variables GitLab
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   script:
-    # On utilise la variable DOCKER_IMAGE demandée
+    # Construction de l'image avec le tag latest
     - docker build -t $DOCKER_IMAGE:latest .
+    # Publication sur Docker Hub
     - docker push $DOCKER_IMAGE:latest

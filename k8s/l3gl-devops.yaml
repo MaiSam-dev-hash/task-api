@@ -84,7 +84,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /
+          - path: /l3gl
             pathType: Prefix
             backend:
               service:
